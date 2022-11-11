@@ -1,9 +1,11 @@
 from functools import reduce
 
+from polynomial import Polynomial
+from term import Term
 from utils import Point, has_duplicates
 
 
-def newton_interpolation(points: list[Point]) -> float:
+def interpolate_newton(points: list[Point]) -> float:
     if has_duplicates(p.x for p in points):
         raise ValueError("Interpolation requires distinct x coordinates.")
 
@@ -12,29 +14,43 @@ def newton_interpolation(points: list[Point]) -> float:
     # f1 = P(x1) = a0 + a1(x1 - x0)
     # P(x) = a0 +a1(x - x0) + a2(x - x0)(x - x1) + ... + an(x - x0) ... (x - xn)
 
-    parameters = [points[0].y]
+    parameters = []
 
-    # f0 = a0
-    # f1 = a0 + a1(x1 - x0) <=> a1 = (f1 - a0) / (x1 - x0)
-    # f2 = a0 + a1(x1 - x0) + a2(x2 -x0)(x2 - x1) <=> a2 = (f2 - a0 - a1(x1 - x0)) / ((x2 - x0)(x2 - x1))
+    def get_products(idx: int) -> list[list[tuple]]:
+        return [] + [[(idx, range(idx)[i]) for i in range(x)] for x in range(idx + 1)]
 
-    # for n in range(1, degree + 1):
-    #     fn = points[n].y
-    #     an = fn - parameters[0]
-    #     factors = [(p1.x, p2.x) for p1, p2 in zip([points[n]] * (n), points[:n])]
+    def calculate_product(indices: list[list[tuple]]) -> float:
+        prod = 1
+        for tpl in indices:
+            a, b = tpl
+            prod *= a - b
+        return prod
 
-    #     prod = parameters[n] if n < len(parameters) else 1
-    #     for r in range(n):
-    #         used_factors = factors[: r + 1]
-    #         l, r = used_factors[r]
-    #         prod *= l - r
+    for n in range(degree + 1):
+        products = get_products(n)
+        new_parameter = points[n].y
 
-    #     if n >= len(parameters):
-    #         an /= prod
-    #     an -= prod
-    #     parameters.append(an)
-    # return parameters
+        for i in range(n + 1):
+            p = products[i]
+            if i < len(parameters):
+                a = parameters[i]
+                new_parameter -= a * calculate_product(p)
+            else:
+                new_parameter /= calculate_product(p)
+
+        parameters.append(new_parameter)
+
+    poly = Polynomial()
+    for i in range(degree + 1):
+        prod = Polynomial([Term(parameters[i], 0)])
+        for p in range(i):
+            prod *= Term(1, 1) - Term(points[p].x, 0)
+
+        poly += prod
+
+    return poly
 
 
 if __name__ == "__main__":
-    print(newton_interpolation([Point(0, 1), Point(1, 3), Point(2, 2)]))
+    # print(newton_interpolation([Point(-1.5, -14.101420), Point(-0.75, -0.931596), Point(0, 0), Point(0.75, 0.931596), Point(1.5, 14.101420)]))
+    print(interpolate_newton([Point(1, 2), Point(2, 3), Point(3, 1), Point(4, 3)]))
