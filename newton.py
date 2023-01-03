@@ -18,6 +18,10 @@ def interpolate_newton(points: list[Point]) -> float:
     parameters = []
 
     def get_products(idx: int) -> list[list[tuple]]:
+        """
+        Returns:
+            list[list[tuple]]: (x - x0) ... (x - xn) Produkte
+        """
         return [] + [[(idx, range(idx)[i]) for i in range(x)] for x in range(idx + 1)]
 
     def calculate_product(indices: list[list[tuple]]) -> float:
@@ -50,7 +54,6 @@ def interpolate_newton(points: list[Point]) -> float:
         poly += prod
 
     return poly
-
 
 
 if __name__ == "__main__":

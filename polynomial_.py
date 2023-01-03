@@ -14,9 +14,13 @@ def power_to_superscript(power: int) -> str:
     return superscript_power
 
 
+POWER = int
+COEFFICIENT = float
+
+
 @dataclass
 class Polynomial:
-    def __init__(self, coefficients: dict[int, float] = None) -> None:
+    def __init__(self, coefficients: dict[POWER, COEFFICIENT] = None) -> None:
         self.coefficients = coefficients if coefficients is not None else {0: 0}
         self.remove_empty_coefficients()
 
@@ -66,21 +70,33 @@ class Polynomial:
         return Polynomial({power - dividing_by: self[power] / other[dividing_by] for power in self.powers})
 
     def __getitem__(self, power: int) -> float:
+        """
+        Returns:
+            float: The coefficient for a given power or 0 if it doesn't exist.
+        """
         return self.coefficients.get(power, 0)
 
     def __repr__(self) -> str:
         if not self.coefficients:
             return ""
+
         return ("-" if self[max(self.powers)] < 0 else "") + "".join(
             f"{(' + ' if coefficient >= 0 else ' - ') if idx > 0 else ''}{abs(coefficient) if abs(coefficient) != 1 else ''}{('x' if power != 0 else '') + (power_to_superscript(power) if power not in (0, 1) else '')}"
             for idx, (power, coefficient) in enumerate(sorted(self.coefficients.items(), reverse=True))
         )
 
     def remove_empty_coefficients(self) -> None:
+        """
+        Remove all powers with a coefficient of 0. E.g. 0x³ + 2x² + 4x -> 2x² + 4x
+        """
         new_coefficients = {power: coefficient for power, coefficient in self.coefficients.items() if coefficient != 0 or power == 0}
         self.coefficients = new_coefficients
 
     def y_intercept(self) -> float:
+        """
+        Returns:
+            float: Result of the Polynomial equation at x = 0
+        """
         return self(0)
 
     def differentiate(self) -> Polynomial:
@@ -90,4 +106,5 @@ class Polynomial:
 if __name__ == "__main__":
 
     p1 = Polynomial({1: 4, 2: 2})
+    p2 = Polynomial({3: 5})
     print(p1)

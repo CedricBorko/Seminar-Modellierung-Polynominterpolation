@@ -5,26 +5,36 @@ def interpolate_aitken_neville(points: list[Point], x: float) -> float:
     if has_duplicates(p.x for p in points):
         raise ValueError("Interpolation requires distinct x coordinates.")
 
-    degree = len(points) - 1
-    polynomials = {(i, i): points[i].y for i in range(degree + 1)}
+    n = len(points)
+    # polynomials = {(i, i): points[i].y for i in range(n)}
 
-    for l in range(degree + 1):
-        i = 0
-        j = l + 1
-        for _ in range(degree - l):
+    polys = [0] * n
 
-            p_left = polynomials[i + 1, j]
-            p_right = polynomials[i, j - 1]
+    for l in range(n):
+        for i in range(n - l):
+            if l == 0:
+                polys[i] = points[i].y
+            else:
+                numerator = (x - points[i + l].x) * polys[i] + (points[i].x - x) * polys[i + 1]
+                denominator = points[i].x - points[i + l].x
+                polys[i] = numerator / denominator
 
-            p_ij = (x - points[i].x) * p_left - (x - points[j].x) * p_right
-            p_ij /= points[j].x - points[i].x
-            polynomials[i, j] = p_ij
+        # i = 0
+        # j = l + 1
+        # for _ in range(n):
 
-            i += 1
-            j += 1
+        #     p_left = polynomials[i + 1, j]
+        #     p_right = polynomials[i, j - 1]
 
-    return polynomials[0, degree]
+        #     p_ij = (x - points[i].x) * p_left - (x - points[j].x) * p_right
+        #     p_ij /= points[j].x - points[i].x
+        #     polynomials[i, j] = p_ij
+
+        #     i += 1
+        #     j += 1
+
+    return polys[0]
 
 
 if __name__ == "__main__":
-    print(interpolate_aitken_neville([Point(16, 0.25), Point(64, 0.125), Point(100, 0.1)], 81))
+    print(interpolate_aitken_neville([Point(1, 0.25), Point(2, 0.5), Point(4, 1)], 8))
