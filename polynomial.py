@@ -98,4 +98,4 @@ if __name__ == "__main__":
 
     p1 = Polynomial([Term(1, 4), Term(2, 2)])
 
-    print(p1 / 4)
+    print(p1 )

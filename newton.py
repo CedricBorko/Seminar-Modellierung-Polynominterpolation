@@ -1,4 +1,5 @@
 from functools import reduce
+from typing import Collection
 
 from polynomial import Polynomial
 from term import Term
@@ -51,6 +52,6 @@ def interpolate_newton(points: list[Point]) -> float:
     return poly
 
 
+
 if __name__ == "__main__":
-    # print(newton_interpolation([Point(-1.5, -14.101420), Point(-0.75, -0.931596), Point(0, 0), Point(0.75, 0.931596), Point(1.5, 14.101420)]))
     print(interpolate_newton([Point(1, 2), Point(2, 3), Point(3, 1), Point(4, 3)]))

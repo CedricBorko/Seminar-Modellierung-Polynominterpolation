@@ -24,3 +24,7 @@ def interpolate_aitken_neville(points: list[Point], x: float) -> float:
             j += 1
 
     return polynomials[0, degree]
+
+
+if __name__ == "__main__":
+    print(interpolate_aitken_neville([Point(16, 0.25), Point(64, 0.125), Point(100, 0.1)], 81))
