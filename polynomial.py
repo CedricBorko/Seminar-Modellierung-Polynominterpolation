@@ -86,7 +86,7 @@ class Polynomial:
             return ""
 
         return ("-" if self[max(self.powers)] < 0 else "") + "".join(
-            f"{(' + ' if coefficient >= 0 else ' - ') if idx > 0 else ''}{Fraction(abs(coefficient)) if abs(coefficient) != 1 or power == 0 else ''}{('x' if power != 0 else '') + (power_to_superscript(power) if power not in (0, 1) else '')}"
+            f"{(' + ' if coefficient >= 0 else ' - ') if idx > 0 else ''}{round(abs(coefficient), 3) if abs(coefficient) != 1 or power == 0 else ''}{('x' if power != 0 else '') + (power_to_superscript(power) if power not in (0, 1) else '')}"
             for idx, (power, coefficient) in enumerate(sorted(self.coefficients.items(), reverse=True))
         )
 
