@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import interpolate
-
 from aitken_neville import interpolate_aitken_neville
 from lagrange import interpolate_lagrange
 from newton import interpolate_newton
-from polynomial import Polynomial
+from scipy import interpolate
 from utils import Point
+
+from polynomial import Polynomial
 
 
 def f(x):
