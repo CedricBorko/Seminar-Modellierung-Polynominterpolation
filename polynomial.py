@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from fractions import Fraction
 
 Number = int | float
 SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
@@ -37,17 +36,24 @@ class Polynomial:
         return len(self.coefficients)
 
     def __call__(self, value: float) -> float:
-        return sum(factor * value**power for power, factor in self.coefficients.items())
+        return sum(factor * value ** power for power, factor in self.coefficients.items())
 
     def __add__(self, other: Polynomial | Number) -> Polynomial:
         if isinstance(other, Number):
-            return Polynomial({power: self[power] + (other if power == 0 else 0) for power in self.powers.union({0})})
+            return Polynomial(
+                {power: self[power] + (other if power == 0 else 0) for power in self.powers.union({0})}
+            )
         powers = self.powers.union(other.powers)
         return Polynomial({power: self[power] + other[power] for power in powers})
 
-    def __sub__(self, other: Polynomial) -> Polynomial:
+    def __radd__(self, other) -> Polynomial:
+        return Polynomial.__add__(self, other)
+
+    def __sub__(self, other: Polynomial | Number) -> Polynomial:
         if isinstance(other, Number):
-            return Polynomial({power: self[power] - (other if power == 0 else 0) for power in self.powers.union({0})})
+            return Polynomial(
+                {power: self[power] - (other if power == 0 else 0) for power in self.powers.union({0})}
+            )
 
         powers = self.powers.union(other.powers)
         return Polynomial({power: self[power] - other[power] for power in powers})
@@ -86,15 +92,17 @@ class Polynomial:
             return ""
 
         return ("-" if self[max(self.powers)] < 0 else "") + "".join(
-            f"{(' + ' if coefficient >= 0 else ' - ') if idx > 0 else ''}{round(abs(coefficient), 3) if abs(coefficient) != 1 or power == 0 else ''}{('x' if power != 0 else '') + (power_to_superscript(power) if power not in (0, 1) else '')}"
-            for idx, (power, coefficient) in enumerate(sorted(self.coefficients.items(), reverse=True))
+            f"{(' + ' if coefficient >= 0 else ' - ') if idx > 0 else ''}{round(abs(coefficient), 6) if abs(coefficient) != 1 or power == 0 else ''}{('x' if power != 0 else '') + (power_to_superscript(power) if power not in (0, 1) else '')}"
+            for idx, (power, coefficient) in
+            enumerate(sorted(filter(lambda c: abs(c[1]) > 0.00001, self.coefficients.items()), reverse=True))
         )
 
     def remove_empty_coefficients(self) -> None:
         """
         Remove all powers with a coefficient of 0. E.g. 0x³ + 2x² + 4x -> 2x² + 4x
         """
-        new_coefficients = {power: coefficient for power, coefficient in self.coefficients.items() if coefficient != 0}
+        new_coefficients = {power: coefficient for power, coefficient in self.coefficients.items() if
+                            coefficient != 0}
         self.coefficients = new_coefficients
 
     def y_intercept(self) -> float:
@@ -107,9 +115,23 @@ class Polynomial:
     def derivative(self) -> Polynomial:
         return Polynomial({power - 1: self[power] * power for power in self.powers if power != 0})
 
+    @classmethod
+    def one(cls: Polynomial) -> Polynomial:
+        return Polynomial({0: 1})
+
+    @classmethod
+    def x(cls: Polynomial) -> Polynomial:
+        return Polynomial({1: 1})
+
+    def __pow__(self, power, modulo = None) -> Polynomial:
+        if power < 0: raise ValueError("Cannot raise to negative power (yet).")
+        if power == 0: return Polynomial.one()
+        if power == 1: return self
+        if power == 2: return self * self
+        else: return (self * self) ** (power - 1)
+
 
 if __name__ == "__main__":
-
     p = Polynomial({3: 4, 2: 1, 0: 5})
     print(p)
     print(p.derivative())
