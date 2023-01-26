@@ -1,15 +1,13 @@
 import math
 import operator
-from functools import reduce
+from functools import reduce, wraps
+from time import time
 from typing import Callable
 
-import math
-import sympy as sp
 import numpy as np
+import sympy as sp
 
 from polynomial import Polynomial
-from functools import wraps
-from time import time
 
 
 def timing(f):
@@ -18,18 +16,14 @@ def timing(f):
         ts = time()
         result = f(*args, **kw)
         te = time()
-        print(f'func:{f.__name__} took: {te - ts:2.4f} sec')
+        print(f"func:{f.__name__} took: {te - ts:2.4f} sec")
         return result
 
     return wrap
 
 
 @timing
-def divided_differences_newton(
-    x_coords: list[float],
-    y_coords: list[float],
-    previous_coefficients: np.ndarray = None
-) -> np.ndarray:
+def divided_differences_newton(x_coords: list[float], y_coords: list[float], previous_coefficients: np.ndarray = None) -> np.ndarray:
     size = len(x_coords)
     if previous_coefficients is None:
         coeffs = np.zeros([size, size])
@@ -43,21 +37,21 @@ def divided_differences_newton(
 
     size_diff = size - previous_coefficients.shape[0]
     new_coefficients = np.zeros((size, size))
-    new_coefficients[:size - size_diff, :size - size_diff] = previous_coefficients
+    new_coefficients[: size - size_diff, : size - size_diff] = previous_coefficients
     new_coefficients[:, 0] = y_coords
 
     for j in range(1, size):
         for i in range(size - j):
-            if new_coefficients[i][j] != 0: continue
-            new_coefficients[i][j] = (new_coefficients[i + 1][j - 1] - new_coefficients[i][j - 1]) / (
-                x_coords[i + j] - x_coords[i])
+            if new_coefficients[i][j] != 0:
+                continue
+            new_coefficients[i][j] = (new_coefficients[i + 1][j - 1] - new_coefficients[i][j - 1]) / (x_coords[i + j] - x_coords[i])
 
     return new_coefficients
 
 
 def matrix_to_polynom(matrix):
-    x = sp.Symbol('x')
-    f = sp.Function('z')(x)
+    x = sp.Symbol("x")
+    f = sp.Function("z")(x)
     f += matrix[0][1]
     size = len(matrix)
     for i in range(2, size + 1):
@@ -66,7 +60,7 @@ def matrix_to_polynom(matrix):
             zeroing = zeroing * (x - matrix[a][0])
         poly = matrix[0][i] * zeroing
         f += poly
-    f -= sp.Function('z')(x)
+    f -= sp.Function("z")(x)
     return sp.simplify(f)
 
 
@@ -95,11 +89,7 @@ def divided_differences(x_coords: list[float], y_coords: list[float]) -> np.ndar
     return coeffs
 
 
-def interpolate_newton(
-    x_coords: list[float],
-    y_coords: list[float],
-    value: float = None
-) -> float | Polynomial:
+def interpolate_newton(x_coords: list[float], y_coords: list[float], value: float = None) -> float | Polynomial:
     if not is_valid_input(x_coords, y_coords):
         raise ValueError("Invalid Input. X coordinates must be distinct and x, y must have the same length.")
     # f0 = P(x0) = a0
@@ -152,8 +142,7 @@ def interpolate_aitken_neville(x_coords: list[float], y_coords: list[float], val
 
     for j in range(1, size):
         for i in range(size - j):
-            numerator = (value - x_coords[i + j]) * polynomials[i] + (x_coords[i] - value) * polynomials[
-                i + 1]
+            numerator = (value - x_coords[i + j]) * polynomials[i] + (x_coords[i] - value) * polynomials[i + 1]
             denominator = x_coords[i] - x_coords[i + j]
             polynomials[i] = numerator / denominator
 
@@ -161,12 +150,8 @@ def interpolate_aitken_neville(x_coords: list[float], y_coords: list[float], val
 
 
 def interpolate_lagrange(
-    x_coords: list[float],
-    y_coords: list[float],
-    value: float = None,
-    get_polynomials: bool = False
-) -> \
-    list[float] | float | Polynomial:
+    x_coords: list[float], y_coords: list[float], value: float = None, get_polynomials: bool = False
+) -> list[float] | float | Polynomial:
     if has_duplicates(x_coords):
         raise ValueError("Interpolation requires distinct x coordinates.")
 
@@ -185,7 +170,8 @@ def interpolate_lagrange(
             denominator = x_coords[i] - x_coords[j]
             lagrange_polynomials[i] = numerator / denominator * lagrange_polynomials[i]
 
-    if get_polynomials: return [p * y for y, p in zip(y_coords, lagrange_polynomials)]
+    if get_polynomials:
+        return [p * y for y, p in zip(y_coords, lagrange_polynomials)]
     sum_poly = sum(polynomial * y_value for polynomial, y_value in zip(lagrange_polynomials, y_coords))
     return sum_poly(value) if value is not None else sum_poly
 
@@ -198,8 +184,7 @@ def interpolate_nevillePoint(p, xlist, ylist, point):
         for k in range(1, size):
             for i in range(size):
                 if i + k <= size - 1:  # 0 <= i <= i + k <= n)
-                    p[i][k] = ((point - x[i]) * p[i + 1][k - 1]
-                               - (point - x[i + k]) * p[i][k - 1]) / (x[i + k] - x[i])  # (3.20)
+                    p[i][k] = ((point - x[i]) * p[i + 1][k - 1] - (point - x[i + k]) * p[i][k - 1]) / (x[i + k] - x[i])  # (3.20)
     else:
         for b in range(len(p)):
             p[b] = p[b] + [0] * diff
@@ -211,13 +196,17 @@ def interpolate_nevillePoint(p, xlist, ylist, point):
             for i in range(size):
                 if i + k <= size - 1:  # 0 <= i <= i + k <= n)
                     if p[i][k] == 0:
-                        p[i][k] = ((point - x[i]) * p[i + 1][k - 1]
-                                   - (point - x[i + k]) * p[i][k - 1]) / (x[i + k] - x[i])  # (3.20)
+                        p[i][k] = ((point - x[i]) * p[i + 1][k - 1] - (point - x[i + k]) * p[i][k - 1]) / (x[i + k] - x[i])  # (3.20)
     return p
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from matplotlib import pyplot as plt
+
+    x = [1, 2, 3]
+    y = [3, 1, 4]
+
+    print(interpolate_aitken_neville(x, y, 1.5))
 
     # x_, y_ = [1, 2, 4], [4, 5, 1]
     # polys = interpolate_lagrange(x_, y_, get_polynomials=True)
@@ -262,7 +251,6 @@ if __name__ == '__main__':
     F_1 = math.exp
     F_2 = math.sin
 
-
     def calculate_interpolation(n_points: int) -> tuple[Polynomial, Polynomial]:
         x__ = [n for n in range(-n_points // 2 + 1, n_points // 2 + 1)]
         y__ = []
@@ -281,7 +269,6 @@ if __name__ == '__main__':
         F2_ = interpolate_newton(x__, y__)
         return F1_, F2_
 
-
     def getY(poly: Callable, __x: np.arange) -> list:
         y__ = []
         for i in __x:
@@ -291,7 +278,6 @@ if __name__ == '__main__':
                 y__.append(0)
         return y__
 
-
     plt.style.use("bmh")
     figure, axes = plt.subplots(figsize=(16, 9))
     F1, F2 = calculate_interpolation(points)
@@ -300,14 +286,14 @@ if __name__ == '__main__':
     axes.set_ylim(-4, 4)
     axes.set_title(f"Interpolation mit {points} Punkten.")
 
-    line1, = axes.plot(x, getY(F_1, x), label=F_1.__name__, lw=4, alpha=0.25, c="g")
+    (line1,) = axes.plot(x, getY(F_1, x), label=F_1.__name__, lw=4, alpha=0.25, c="g")
     # line2, = axes.plot(x, getY(F_2, x), label=F_2.__name__, lw=4, alpha=0.25, c="g")
 
     x__ = [n for n in range(-points // 2 + 1, points // 2 + 1)]
     y__ = getY(F_1, x__)
     scatter = plt.scatter(x__, y__, s=40, c="k", zorder=5)
 
-    line3, = axes.plot(x, getY(F1, x), label=f"{F1.__repr__()}", c="g")
+    (line3,) = axes.plot(x, getY(F1, x), label=f"{F1.__repr__()}", c="g")
     # line4, = axes.plot(x, getY(F2, x), label=f"{F2.__repr__()}", c="g")
     legend = axes.legend(shadow=True, fancybox=True, loc=0)
     figure.tight_layout()
@@ -318,7 +304,6 @@ if __name__ == '__main__':
         legline.set_picker(True)  # Enable picking on the legend line.
         lined[legline] = origline
 
-
     def on_pick(event) -> None:
         legend_line = event.artist
         original_line = lined[legend_line]
@@ -327,11 +312,10 @@ if __name__ == '__main__':
         legend_line.set_alpha(1.0 if visible else 0.2)
         figure.canvas.draw()
 
-
     def on_press(event) -> None:
         global points, line3, F1, F2, figure, legend, lined, x, line1, lines, scatter
 
-        increment = 1 if event.button == 'up' else -1
+        increment = 1 if event.button == "up" else -1
         points += increment
         if points == 1:
             points = 2
@@ -353,10 +337,10 @@ if __name__ == '__main__':
                 lined[legline] = origline
                 visible.append(lined[legline].get_visible())
 
-            line1, = axes.plot(x, getY(F_1, x), label=F_1.__name__, lw=4, alpha=0.25, c="g")
+            (line1,) = axes.plot(x, getY(F_1, x), label=F_1.__name__, lw=4, alpha=0.25, c="g")
             # line2, = axes.plot(x, getY(F_2, x), label=F_2.__name__, lw=4, alpha=0.25, c="g")
 
-            line3, = axes.plot(x, getY(F1, x), label=f"{F1.__repr__()}", c="g")
+            (line3,) = axes.plot(x, getY(F1, x), label=f"{F1.__repr__()}", c="g")
             # line4, = axes.plot(x, getY(F2, x), label=f"{F2.__repr__()}", c="g")
 
             if scatter:
@@ -386,7 +370,6 @@ if __name__ == '__main__':
         except ValueError:
             pass
 
-
-    figure.canvas.mpl_connect('pick_event', on_pick)
-    figure.canvas.mpl_connect('scroll_event', on_press)
+    figure.canvas.mpl_connect("pick_event", on_pick)
+    figure.canvas.mpl_connect("scroll_event", on_press)
     plt.show()

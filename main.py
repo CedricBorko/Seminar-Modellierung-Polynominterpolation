@@ -97,10 +97,11 @@ def main():
     N_POINTS: int = 3
     MAX_POINTS: int = 50
     STEP: float = 0.01
-    Y_LIMIT = (-20, 20)
+    Y_LIMIT = (-2, 5)
 
-    x_coords_interpolation = [-1.5, -0.75, 0, 0.75, 1.5]
-    y_coords_interpolation = [-14.101420, -0.931596, 0, 0.931596, 14.101420]
+    x_coords_interpolation = [1, 2, 3]
+    y_coords_interpolation = [3, 1, 4]
+
 
     for p in get_lagrange_polynomials_str(x_coords_interpolation, y_coords_interpolation):
         print(p)
@@ -114,57 +115,52 @@ def main():
     figure, axes = plt.subplots()
     axes.set_facecolor("#fff")
     axes.set_ylim(Y_LIMIT)
-    axes.set_xlim(-1.5, 1.5)
+    axes.set_xlim(0, 5)
     axes.set_title(f"Interpolation mit {len(x_coords_interpolation)} Punkten.")
-    # for idx in range(3):
-    #     y_interpolated = generate_y_coordinates(
-    #         x_smooth,
-    #         p[idx] * y_coords_interpolation[idx],
-    #         fill_value=np.nan
-    #     )
-    #
-    #     axes.plot(
-    #         x_smooth,
-    #         y_interpolated,
-    #         label=f"y{idx} * L{idx}(x)".translate(SUB) + " = " + (
-    #             p[idx] * y_coords_interpolation[idx]).__repr__(),
-    #         lw=3
-    #     )
+    mul_y = True
 
-    # scatter = plt.scatter(
-    #     [xv for xv in x_coords_interpolation[:idx + 1]] * (2 if idx == 2 else 1),
-    #     [1 for _ in x_coords_interpolation[:idx + 1]] + (
-    #         [0 for _ in x_coords_interpolation[:idx + 1]] if idx == 2 else []),
-    #     zorder=4,
-    #     s=160,
-    #     facecolor="none",
-    #     edgecolor="k",
-    #     linewidth=2
-    # )
+    for idx in range(3):
+        y_interpolated = generate_y_coordinates(
+            x_smooth,
+            p[idx] * (y_coords_interpolation[idx] if mul_y else 1),
+            fill_value=np.nan
+        )
 
-    interpolated_line, = axes.plot(
+        axes.plot(
+            x_smooth,
+            y_interpolated,
+            label=f"y{idx} * L{idx}(x)".translate(SUB) + " = " + (
+                p[idx] * (y_coords_interpolation[idx] if mul_y else 1)).__repr__(),
+            lw=3
+        )
+
+        # scatter = plt.scatter(
+        #     [xv for xv in x_coords_interpolation[:idx + 1]] * (2 if idx == 2 else 1),
+        #     [1 for _ in x_coords_interpolation[:idx + 1]] + (
+        #         [0 for _ in x_coords_interpolation[:idx + 1]] if idx == 2 else []),
+        #     zorder=4,
+        #     s=160,
+        #     facecolor="none",
+        #     edgecolor="k",
+        #     linewidth=2
+        # )
+
+    axes.plot(
         x_smooth,
         generate_y_coordinates(x_smooth, polynomial, fill_value=np.nan),
         c="r",
         label="P(x)" + " = " + polynomial.__repr__(),
         lw=2.5
     )
-    axes.plot(
-        x_smooth,
-        generate_y_coordinates(x_smooth, math.tan, fill_value=np.nan),
-        c="k",
-        label="y = tan(x)",
-        lw=2
-    )
 
     scatter = plt.scatter(
         x_coords_interpolation,
         y_coords_interpolation,
         zorder=4,
-        s=160,
+        s=120,
         facecolor="r",
     )
-    axes.legend(loc=3, fancybox=True, shadow=True)
+    axes.legend(fancybox=True, shadow=True)
     plt.tight_layout()
     plt.show()
     #
@@ -307,5 +303,4 @@ def test_lagrange() -> None:
 
 
 if __name__ == '__main__':
-    test_lagrange()
-    plt.show()
+    main()
