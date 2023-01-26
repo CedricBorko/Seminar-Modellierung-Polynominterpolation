@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from main import generate_y_coordinates
-from polynomial import SUB, Polynomial
+from polynomial import SUB, SUP, Polynomial
 
 
 def interpolation_lagrange(x_coordinates: list[float], y_coordinates: list[float]) -> Polynomial:
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     x_coords_interpolation = [1, 2, 3]
     y_coords_interpolation = [3, 1, 4]
 
-    x_smooth = np.linspace(0, 5, 50)
+    x_smooth = np.linspace(-4, 10, 200)
     polynomial = interpolation_lagrange(x_coords_interpolation, y_coords_interpolation)
 
     p = get_lagrange_polynomials(x_coords_interpolation, y_coords_interpolation)
@@ -78,13 +78,32 @@ if __name__ == "__main__":
     figure, axes = plt.subplots(1, 1, figsize=(16, 9))
 
     axes.set_facecolor("#fff")
-    axes.set_xlim(0, 5)
-    axes.set_ylim(-2, 5)
-    axes.set_ylabel("P(x)")
+    axes.set_ylabel("y")
     axes.set_xlabel("x")
-    axes.set_title("Lagrange Interpolation")
+    axes.set_xlim(0, 4)
+    axes.set_ylim(-2, 5)
     mul_y = True
 
+    # p = Polynomial({2: 1, 0: + 1})
+    # q = Polynomial({2: 1, 0: - 1})
+    # r = Polynomial({2: 1})
+
+    # axes.plot(x_smooth, [xv * xv + 1 for xv in x_smooth], label="P(x) = " + p.__repr__())
+    # axes.plot(
+    #     x_smooth,
+    #     [xv * xv - 1 for xv in x_smooth],
+    #     label="Q(x) = " + q.__repr__()
+    # )
+    # axes.plot(x_smooth, [xv * xv for xv in x_smooth], label="R(x) = " + r.__repr__())
+
+    # axes.scatter(
+    #     [-1, 0, 1], [0, 0, 0], zorder=3,
+    #     s=100,
+    #     facecolor="r", )
+
+    # axes.axhline(y=0, lw=3, c="k")
+    axes.set_title("Lagrange Interpolation")
+    #
     # for idx in range(3):
     #     y_interpolated = generate_y_coordinates(x_smooth, p[idx] * (y_coords_interpolation[idx] if mul_y else 1), fill_value=np.nan)
 
@@ -94,13 +113,13 @@ if __name__ == "__main__":
     #         label=f"y{idx} * L{idx}(x)".translate(SUB) + " = " + (p[idx] * (y_coords_interpolation[idx] if mul_y else 1)).__repr__(),
     #     )
 
-    #     # scatter = plt.scatter(
-    #     #     [xv for xv in x_coords_interpolation[: idx + 1]] * (2 if idx == 2 else 1),
-    #     #     [1 for _ in x_coords_interpolation[: idx + 1]] + ([0 for _ in x_coords_interpolation[: idx + 1]] if idx == 2 else []),
-    #     #     zorder=3,
-    #     #     s=100,
-    #     #     facecolor="r",
-    #     # )
+    # scatter = plt.scatter(
+    #     [xv for xv in x_coords_interpolation[: idx + 1]] * (2 if idx == 2 else 1),
+    #     [1 for _ in x_coords_interpolation[: idx + 1]] + ([0 for _ in x_coords_interpolation[: idx + 1]] if idx == 2 else []),
+    #     zorder=3,
+    #     s=100,
+    #     facecolor="r",
+    # )
 
     axes.plot(x_smooth, generate_y_coordinates(x_smooth, polynomial, fill_value=np.nan), c="r", label="P(x)" + " = " + polynomial.__repr__(), lw=2.5)
 
@@ -111,6 +130,6 @@ if __name__ == "__main__":
         s=100,
         facecolor="r",
     )
-    axes.legend(fancybox=True, shadow=True, loc=8)
+    axes.legend(fancybox=True, shadow=True, loc=3)
     plt.tight_layout()
     plt.show()

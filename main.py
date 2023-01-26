@@ -102,7 +102,6 @@ def main():
     x_coords_interpolation = [1, 2, 3]
     y_coords_interpolation = [3, 1, 4]
 
-
     for p in get_lagrange_polynomials_str(x_coords_interpolation, y_coords_interpolation):
         print(p)
         print()
@@ -117,7 +116,7 @@ def main():
     axes.set_ylim(Y_LIMIT)
     axes.set_xlim(0, 5)
     axes.set_title(f"Interpolation mit {len(x_coords_interpolation)} Punkten.")
-    mul_y = True
+    mul_y = False
 
     for idx in range(3):
         y_interpolated = generate_y_coordinates(
@@ -129,7 +128,7 @@ def main():
         axes.plot(
             x_smooth,
             y_interpolated,
-            label=f"y{idx} * L{idx}(x)".translate(SUB) + " = " + (
+            label=f"L{idx}(x)".translate(SUB) + " = " + (
                 p[idx] * (y_coords_interpolation[idx] if mul_y else 1)).__repr__(),
             lw=3
         )
@@ -145,21 +144,21 @@ def main():
         #     linewidth=2
         # )
 
-    axes.plot(
-        x_smooth,
-        generate_y_coordinates(x_smooth, polynomial, fill_value=np.nan),
-        c="r",
-        label="P(x)" + " = " + polynomial.__repr__(),
-        lw=2.5
-    )
+    # axes.plot(
+    #     x_smooth,
+    #     generate_y_coordinates(x_smooth, polynomial, fill_value=np.nan),
+    #     c="r",
+    #     label="P(x)" + " = " + polynomial.__repr__(),
+    #     lw=2.5
+    # )
 
-    scatter = plt.scatter(
-        x_coords_interpolation,
-        y_coords_interpolation,
-        zorder=4,
-        s=120,
-        facecolor="r",
-    )
+    # scatter = plt.scatter(
+    #     x_coords_interpolation,
+    #     y_coords_interpolation,
+    #     zorder=4,
+    #     s=120,
+    #     facecolor="r",
+    # )
     axes.legend(fancybox=True, shadow=True)
     plt.tight_layout()
     plt.show()
